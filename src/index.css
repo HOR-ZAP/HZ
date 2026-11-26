@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+/* Leaflet Container & Markers */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: #f1f5f9;
+}
+
+.elevation-marker {
+  background-color: #ef4444;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #ef4444, 0 0 24px #ef4444;
+  width: 16px !important;
+  height: 16px !important;
+  margin-left: -8px !important;
+  margin-top: -8px !important;
+  animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7), 0 0 10px #ef4444;
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0), 0 0 18px #ef4444;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 0 10px #ef4444;
+  }
+}
+
+/* Heatmap styles */
+.heatmap-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  grid-auto-flow: column;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.heatmap-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: #f1f5f9;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.3);
+  z-index: 20;
+}
+
+.heatmap-cell.level-1 { background-color: #a7f3d0; }
+.heatmap-cell.level-2 { background-color: #34d399; }
+.heatmap-cell.level-3 { background-color: #10b981; }
+.heatmap-cell.level-4 { background-color: #059669; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile 9:16 display layout (< 768px) */
+.mobile-9-16-outer {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.mobile-9-16-frame {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+@media screen and (max-width: 767px) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+    background-color: #1c1917;
+  }
+
+  .mobile-9-16-outer {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1c1917;
+    overflow: hidden;
+  }
+
+  .mobile-9-16-frame {
+    width: min(100vw, calc(100vh * 9 / 16));
+    width: min(100vw, calc(100dvh * 9 / 16));
+    height: min(100vh, calc(100vw * 16 / 9));
+    height: min(100dvh, calc(100vw * 16 / 9));
+    min-height: 0;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  }
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background-color: #ffffff !important;
+  }
+
+  .mobile-9-16-outer,
+  .mobile-9-16-frame {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: auto !important;
+    overflow: visible !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* Official Sign in with Google button styles */
+.gsi-material-button {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-appearance: none;
+  background-color: WHITE;
+  background-image: none;
+  border: 1px solid #747775;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-family: 'Roboto', arial, sans-serif;
+  font-size: 14px;
+  height: 40px;
+  letter-spacing: 0.25px;
+  outline: none;
+  overflow: hidden;
+  padding: 0 12px;
+  position: relative;
+  text-align: center;
+  -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+  transition: background-color .218s, border-color .218s, box-shadow .218s;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: auto;
+  max-width: 400px;
+  min-width: min-content;
+}
+.gsi-material-button .gsi-material-button-icon {
+  height: 20px;
+  margin-right: 10px;
+  min-width: 20px;
+  width: 20px;
+}
+.gsi-material-button .gsi-material-button-content-wrapper {
+  -webkit-align-items: center;
+  align-items: center;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  height: 100%;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+}
+.gsi-material-button .gsi-material-button-contents {
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
+  font-family: 'Roboto', arial, sans-serif;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+.gsi-material-button .gsi-material-button-state {
+  -webkit-transition: opacity .218s;
+  transition: opacity .218s;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.gsi-material-button:disabled {
+  cursor: default;
+  background-color: #ffffff61;
+  border-color: #1f1f1f1f;
+}
+.gsi-material-button:disabled .gsi-material-button-contents {
+  opacity: 38%;
+}
+.gsi-material-button:disabled .gsi-material-button-icon {
+  opacity: 38%;
+}
+.gsi-material-button:not(:disabled):active .gsi-material-button-state,
+.gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+  background-color: #303030;
+  opacity: 12%;
+}
+.gsi-material-button:not(:disabled):hover {
+  -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+}
+.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+  background-color: #303030;
+  opacity: 8%;
+}
+
