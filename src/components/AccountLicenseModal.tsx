@@ -453,13 +453,6 @@ export const AccountLicenseModal: React.FC<AccountLicenseModalProps> = ({
                         <KeyRound className="w-4 h-4 text-emerald-600" />
                         <span>Aktivovat zakoupený licenční klíč</span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setLicenseKeyInput(billingConfig.demoKeyHint)}
-                        className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
-                      >
-                        Vyplnit demo klíč ({billingConfig.demoKeyHint})
-                      </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -467,7 +460,7 @@ export const AccountLicenseModal: React.FC<AccountLicenseModalProps> = ({
                         type="text"
                         value={licenseKeyInput}
                         onChange={(e) => setLicenseKeyInput(e.target.value)}
-                        placeholder="Licenční klíč (např. HZ-PRO-2026-DEMO)"
+                        placeholder="Zadejte váš licenční klíč"
                         className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs font-mono text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
                         maxLength={128}
                       />
@@ -842,9 +835,7 @@ export const AccountLicenseModal: React.FC<AccountLicenseModalProps> = ({
                   </div>
                 ) : (
                   <div className="text-[11px] text-emerald-900/75 bg-white/80 border border-emerald-200/80 rounded-lg px-3 py-2">
-                    Kontaktní e-mail podpory nastaví provozovatel v proměnné prostředí{' '}
-                    <code className="font-mono font-bold">SUPPORT_EMAIL</code> před veřejným
-                    spuštěním.
+                    Kontaktní e-mail podpory bude doplněn provozovatelem před zahájením prodeje.
                   </div>
                 )}
               </section>

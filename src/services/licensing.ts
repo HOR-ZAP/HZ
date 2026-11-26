@@ -5,7 +5,6 @@ export const FREE_MAX_PLANNED = 3;
 export const TRIAL_DAYS = 7;
 export const LIFETIME_PRICE_CZK = 250;
 export const LIFETIME_PRICE_EUR = 10;
-export const DEMO_LICENSE_KEY = 'HZ-PRO-2026-DEMO';
 
 export type LicenseTier = 'free' | 'trial' | 'pro';
 
@@ -34,7 +33,6 @@ export interface PublicBillingConfig {
   checkoutUrl: string;
   priceLifetimeCzk: number;
   priceLifetimeEur: number;
-  demoKeyHint: string;
   supportEmail: string;
   operatorName: string;
   operatorIco: string;
@@ -112,7 +110,6 @@ function getStaticFallbackConfig(): PublicBillingConfig {
     checkoutUrl: sanitizeHttpsUrl(env.VITE_CHECKOUT_URL),
     priceLifetimeCzk: LIFETIME_PRICE_CZK,
     priceLifetimeEur: LIFETIME_PRICE_EUR,
-    demoKeyHint: DEMO_LICENSE_KEY,
     supportEmail: (env.VITE_SUPPORT_EMAIL || '').trim(),
     operatorName: (env.VITE_OPERATOR_NAME || '').trim(),
     operatorIco: (env.VITE_OPERATOR_ICO || '').trim(),
@@ -309,14 +306,7 @@ export async function activateLicenseKeyOnServer(
     return { state: next, message: opts.message };
   };
 
-  // 1. Instant offline verification for Demo key or self-contained signed HZ-V4-... key
-  if (normalizedKey === DEMO_LICENSE_KEY) {
-    return finalizeActivation({
-      isDemo: true,
-      message: 'Testovací doživotní PRO licence byla úspěšně aktivována.',
-    });
-  }
-
+  // 1. Instant offline verification for self-contained signed HZ-V4-... key
   if (verifyOfflineChecksumKey(normalizedKey)) {
     return finalizeActivation({
       isDemo: false,
@@ -380,7 +370,7 @@ export async function activateLicenseKeyOnServer(
 
   throw new Error(
     lsResult.message ||
-      'Licenční klíč nebyl rozpoznán. Zkontrolujte překlepy nebo vyzkoušejte klíč HZ-PRO-2026-DEMO.'
+      'Licenční klíč nebyl rozpoznán. Zkontrolujte prosím překlepy nebo kontaktujte podporu.'
   );
 }
 
@@ -410,7 +400,6 @@ export async function fetchPublicBillingConfig(): Promise<PublicBillingConfig> {
         typeof data.priceLifetimeCzk === 'number' ? data.priceLifetimeCzk : LIFETIME_PRICE_CZK,
       priceLifetimeEur:
         typeof data.priceLifetimeEur === 'number' ? data.priceLifetimeEur : LIFETIME_PRICE_EUR,
-      demoKeyHint: typeof data.demoKeyHint === 'string' ? data.demoKeyHint : DEMO_LICENSE_KEY,
       supportEmail:
         typeof data.supportEmail === 'string' && data.supportEmail.trim()
           ? data.supportEmail.trim()

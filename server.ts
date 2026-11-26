@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 3000);
-const DEMO_KEY = 'HZ-PRO-2026-DEMO';
 const PRICE_LIFETIME_CZK = 250;
 const PRICE_LIFETIME_EUR = 10;
 
@@ -111,7 +110,6 @@ function sanitizeShortText(raw: string | undefined, maxLen = 160): string {
       checkoutUrl: sanitizeCheckoutUrl(process.env.CHECKOUT_URL),
       priceLifetimeCzk: PRICE_LIFETIME_CZK,
       priceLifetimeEur: PRICE_LIFETIME_EUR,
-      demoKeyHint: DEMO_KEY,
       supportEmail: sanitizeEmail(process.env.SUPPORT_EMAIL),
       operatorName: sanitizeShortText(process.env.OPERATOR_NAME, 160),
       operatorIco: sanitizeShortText(process.env.OPERATOR_ICO, 40),
@@ -142,22 +140,7 @@ function sanitizeShortText(raw: string | undefined, maxLen = 160): string {
         ? rawInstance.trim()
         : 'HorskyZapisnikWeb';
 
-    // 1. Demo / test key
-    if (normalizedKey === DEMO_KEY) {
-      res.json({
-        valid: true,
-        tier: 'pro',
-        plan: 'lifetime',
-        licenseKey: normalizedKey,
-        customerEmail: email || undefined,
-        isDemo: true,
-        activatedAt: new Date().toISOString(),
-        message: 'Testovací doživotní PRO licence byla úspěšně aktivována.',
-      });
-      return;
-    }
-
-    // 2. Self-contained offline signed key (HZ-V4-XXXX-XXXX-CCCC)
+    // 1. Self-contained offline signed key (HZ-V4-XXXX-XXXX-CCCC)
     const match = /^HZ-V4-([A-Z0-9]{4,8})-([A-Z0-9]{4,8})-([A-Z0-9]{4})$/.exec(normalizedKey);
     if (match) {
       const [, partA, partB, providedChecksum] = match;
@@ -226,7 +209,7 @@ function sanitizeShortText(raw: string | undefined, maxLen = 160): string {
     res.status(400).json({
       valid: false,
       message:
-        'Licenční klíč nebyl rozpoznán. Zkontrolujte překlepy nebo vyzkoušejte testovací klíč HZ-PRO-2026-DEMO.',
+        'Licenční klíč nebyl rozpoznán. Zkontrolujte prosím překlepy nebo kontaktujte podporu.',
     });
   });
 
