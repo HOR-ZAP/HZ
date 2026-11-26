@@ -100,6 +100,7 @@ export default function App() {
   const [licenseState, setLicenseState] = useState<LicenseState>(() => loadLicenseStateSync());
   const [billingConfig, setBillingConfig] = useState<PublicBillingConfig>({
     checkoutUrl: '',
+    polarOrganizationId: '',
     priceLifetimeCzk: LIFETIME_PRICE_CZK,
     priceLifetimeEur: LIFETIME_PRICE_EUR,
     supportEmail: '',
@@ -487,12 +488,17 @@ export default function App() {
 
   const handleActivateLicenseKey = useCallback(
     async (key: string, email: string) => {
-      const { state, message } = await activateLicenseKeyOnServer(key, email, licenseState);
+      const { state, message } = await activateLicenseKeyOnServer(
+        key,
+        email,
+        licenseState,
+        billingConfig.polarOrganizationId
+      );
       setLicenseState(state);
       setAccountModal((prev) => ({ ...prev, lockedFeature: null }));
       showToast(message, 'success');
     },
-    [licenseState, showToast]
+    [licenseState, billingConfig.polarOrganizationId, showToast]
   );
 
   const handleRequestDeactivateLicense = useCallback(() => {

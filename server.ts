@@ -35,6 +35,88 @@ function getConfiguredLicenseKeys(): Set<string> {
   return new Set(keys);
 }
 
+async function verifyWithPolar(
+  licenseKey: string,
+  organizationId: string,
+  label: string
+): Promise<{ valid: boolean; activationId?: string; message?: string }> {
+  const apiBase =
+    process.env.POLAR_SANDBOX === 'true' ? 'https://sandbox-api.polar.sh' : 'https://api.polar.sh';
+  const key = licenseKey.trim();
+  const orgId = organizationId.trim();
+
+  const isExpired = (expiresAt?: string | null): boolean => {
+    if (!expiresAt) return false;
+    const ts = Date.parse(expiresAt);
+    return Number.isFinite(ts) && ts <= Date.now();
+  };
+
+  try {
+    const activateRes = await fetch(`${apiBase}/v1/customer-portal/license-keys/activate`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, organization_id: orgId, label: label || 'Horsky Zapisnik Web' }),
+    });
+
+    const activateData = (await activateRes.json().catch(() => ({}))) as {
+      id?: string;
+      license_key?: { status?: string; expires_at?: string | null };
+      detail?: unknown;
+    };
+
+    if (activateRes.ok && activateData.license_key) {
+      if (
+        activateData.license_key.status === 'granted' &&
+        !isExpired(activateData.license_key.expires_at)
+      ) {
+        return { valid: true, activationId: activateData.id };
+      }
+      return { valid: false, message: 'Tento licenční klíč již není aktivní nebo vypršel.' };
+    }
+
+    const detail = typeof activateData.detail === 'string' ? activateData.detail : '';
+    const detailLower = detail.toLowerCase();
+
+    if (
+      activateRes.status === 403 &&
+      (detailLower.includes('does not require activation') ||
+        detailLower.includes('not support activation') ||
+        detailLower.includes('no activation limit'))
+    ) {
+      const validateRes = await fetch(`${apiBase}/v1/customer-portal/license-keys/validate`, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, organization_id: orgId }),
+      });
+      const validateData = (await validateRes.json().catch(() => ({}))) as {
+        status?: string;
+        expires_at?: string | null;
+      };
+      if (validateRes.ok && validateData.status === 'granted' && !isExpired(validateData.expires_at)) {
+        return { valid: true };
+      }
+      return { valid: false, message: 'Licenční klíč nebyl ověřen nebo již není aktivní.' };
+    }
+
+    if (detailLower.includes('limit') || detailLower.includes('activation')) {
+      return {
+        valid: false,
+        message: 'Licenční klíč již vyčerpal maximální počet aktivovaných zařízení.',
+      };
+    }
+
+    return {
+      valid: false,
+      message: detail || 'Licenční klíč nebyl nalezen. Zkontrolujte prosím přesný tvar klíče.',
+    };
+  } catch {
+    return {
+      valid: false,
+      message: 'Nepodařilo se ověřit licenci na serveru Polar. Zkuste to prosím znovu.',
+    };
+  }
+}
+
 async function verifyWithLemonSqueezy(
   licenseKey: string,
   instanceName: string
@@ -107,13 +189,20 @@ function sanitizeShortText(raw: string | undefined, maxLen = 160): string {
 
   app.get('/api/config/public', (_req, res) => {
     res.json({
-      checkoutUrl: sanitizeCheckoutUrl(process.env.CHECKOUT_URL),
+      checkoutUrl: sanitizeCheckoutUrl(process.env.CHECKOUT_URL || process.env.VITE_CHECKOUT_URL),
+      polarOrganizationId: sanitizeShortText(
+        process.env.POLAR_ORGANIZATION_ID || process.env.VITE_POLAR_ORGANIZATION_ID,
+        120
+      ),
       priceLifetimeCzk: PRICE_LIFETIME_CZK,
       priceLifetimeEur: PRICE_LIFETIME_EUR,
-      supportEmail: sanitizeEmail(process.env.SUPPORT_EMAIL),
-      operatorName: sanitizeShortText(process.env.OPERATOR_NAME, 160),
-      operatorIco: sanitizeShortText(process.env.OPERATOR_ICO, 40),
-      operatorAddress: sanitizeShortText(process.env.OPERATOR_ADDRESS, 200),
+      supportEmail: sanitizeEmail(process.env.SUPPORT_EMAIL || process.env.VITE_SUPPORT_EMAIL),
+      operatorName: sanitizeShortText(process.env.OPERATOR_NAME || process.env.VITE_OPERATOR_NAME, 160),
+      operatorIco: sanitizeShortText(process.env.OPERATOR_ICO || process.env.VITE_OPERATOR_ICO, 40),
+      operatorAddress: sanitizeShortText(
+        process.env.OPERATOR_ADDRESS || process.env.VITE_OPERATOR_ADDRESS,
+        200
+      ),
     });
   });
 
@@ -182,7 +271,37 @@ function sanitizeShortText(raw: string | undefined, maxLen = 160): string {
       return;
     }
 
-    // 3. Optional Lemon Squeezy License API verification
+    // 3. Polar.sh Customer Portal License Key API verification
+    const polarOrgId = (
+      process.env.POLAR_ORGANIZATION_ID ||
+      process.env.VITE_POLAR_ORGANIZATION_ID ||
+      ''
+    ).trim();
+    if (polarOrgId) {
+      const polarResult = await verifyWithPolar(rawKey.trim(), polarOrgId, instanceName);
+      if (polarResult.valid) {
+        res.json({
+          valid: true,
+          tier: 'pro',
+          plan: 'lifetime',
+          licenseKey: rawKey.trim(),
+          activationId: polarResult.activationId,
+          customerEmail: email || undefined,
+          isDemo: false,
+          activatedAt: new Date().toISOString(),
+          message: 'Doživotní licence Horský zápisník PRO byla ověřena přes Polar a aktivována.',
+        });
+        return;
+      }
+
+      res.status(400).json({
+        valid: false,
+        message: polarResult.message || 'Licenční klíč nebyl nalezen.',
+      });
+      return;
+    }
+
+    // 4. Optional Lemon Squeezy License API verification
     if (process.env.LEMONSQUEEZY_ENABLED === 'true') {
       const lsResult = await verifyWithLemonSqueezy(normalizedKey, instanceName);
       if (lsResult.valid) {

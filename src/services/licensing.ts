@@ -24,6 +24,7 @@ export interface LicenseState {
   trialStartedAt?: string;
   trialEndsAt?: string;
   licenseKey?: string;
+  activationId?: string;
   customerEmail?: string;
   activatedAt?: string;
   isDemo?: boolean;
@@ -31,6 +32,7 @@ export interface LicenseState {
 
 export interface PublicBillingConfig {
   checkoutUrl: string;
+  polarOrganizationId: string;
   priceLifetimeCzk: number;
   priceLifetimeEur: number;
   supportEmail: string;
@@ -108,6 +110,7 @@ function getStaticFallbackConfig(): PublicBillingConfig {
   const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env || {};
   return {
     checkoutUrl: sanitizeHttpsUrl(env.VITE_CHECKOUT_URL),
+    polarOrganizationId: (env.VITE_POLAR_ORGANIZATION_ID || '').trim(),
     priceLifetimeCzk: LIFETIME_PRICE_CZK,
     priceLifetimeEur: LIFETIME_PRICE_EUR,
     supportEmail: (env.VITE_SUPPORT_EMAIL || '').trim(),
@@ -138,9 +141,147 @@ export function verifyOfflineChecksumKey(rawKey: string): boolean {
 }
 
 /**
- * Direct client-side Lemon Squeezy Public License API activation.
- * Lemon Squeezy's /v1/licenses/activate endpoint is public by design (for desktop, mobile, and static web apps)
- * and requires no secret API key, enabling 0 CZK static hosting on GitHub Pages.
+ * Direct client-side Polar.sh Customer Portal License Key API activation/validation.
+ * Public by design (no secret API key needed) — requires only the public organization_id.
+ * Automatically falls back from /activate to /validate if the benefit has no activation limit.
+ */
+async function verifyDirectlyWithPolar(
+  rawLicenseKey: string,
+  organizationId: string,
+  label = 'Horsky Zapisnik Web'
+): Promise<{ valid: boolean; activationId?: string; message?: string }> {
+  const key = rawLicenseKey.trim();
+  const orgId = organizationId.trim();
+  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env || {};
+  const apiBase =
+    env.VITE_POLAR_SANDBOX === 'true' ? 'https://sandbox-api.polar.sh' : 'https://api.polar.sh';
+
+  const isExpired = (expiresAt?: string | null): boolean => {
+    if (!expiresAt) return false;
+    const ts = Date.parse(expiresAt);
+    return Number.isFinite(ts) && ts <= Date.now();
+  };
+
+  const extractDetail = (data: unknown): string => {
+    if (!data || typeof data !== 'object') return '';
+    const d = data as { detail?: unknown; error?: unknown };
+    if (typeof d.detail === 'string') return d.detail;
+    if (Array.isArray(d.detail)) {
+      return d.detail
+        .map((item) =>
+          item && typeof item === 'object' && 'msg' in item
+            ? String((item as { msg?: unknown }).msg || '')
+            : String(item)
+        )
+        .filter(Boolean)
+        .join(' ');
+    }
+    if (typeof d.error === 'string') return d.error;
+    return '';
+  };
+
+  try {
+    // 1. Try /activate first (registers a device slot when activation limit is configured)
+    const activateRes = await fetch(`${apiBase}/v1/customer-portal/license-keys/activate`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        key,
+        organization_id: orgId,
+        label,
+      }),
+    });
+
+    const activateData = (await activateRes.json().catch(() => ({}))) as {
+      id?: string;
+      license_key?: { status?: string; expires_at?: string | null };
+      detail?: unknown;
+      error?: unknown;
+    };
+
+    if (activateRes.ok && activateData.license_key) {
+      if (
+        activateData.license_key.status === 'granted' &&
+        !isExpired(activateData.license_key.expires_at)
+      ) {
+        return { valid: true, activationId: activateData.id };
+      }
+      return {
+        valid: false,
+        message: 'Tento licenční klíč již není aktivní nebo vypršel.',
+      };
+    }
+
+    const detail = extractDetail(activateData);
+    const detailLower = detail.toLowerCase();
+
+    // 2. If the Polar benefit does not require activation (no activation limit set), call /validate
+    if (
+      activateRes.status === 403 &&
+      (detailLower.includes('does not require activation') ||
+        detailLower.includes('not support activation') ||
+        detailLower.includes('no activation limit'))
+    ) {
+      const validateRes = await fetch(`${apiBase}/v1/customer-portal/license-keys/validate`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          key,
+          organization_id: orgId,
+        }),
+      });
+
+      const validateData = (await validateRes.json().catch(() => ({}))) as {
+        status?: string;
+        expires_at?: string | null;
+        detail?: unknown;
+        error?: unknown;
+      };
+
+      if (validateRes.ok && validateData.status === 'granted' && !isExpired(validateData.expires_at)) {
+        return { valid: true };
+      }
+
+      return {
+        valid: false,
+        message: 'Licenční klíč nebyl ověřen nebo již není aktivní.',
+      };
+    }
+
+    if (detailLower.includes('limit') || detailLower.includes('activation')) {
+      return {
+        valid: false,
+        message: 'Licenční klíč již vyčerpal maximální počet aktivovaných zařízení.',
+      };
+    }
+
+    if (activateRes.status === 404 || detailLower.includes('not found')) {
+      return {
+        valid: false,
+        message: 'Licenční klíč nebyl nalezen. Zkontrolujte prosím přesný tvar klíče z e-mailu.',
+      };
+    }
+
+    return {
+      valid: false,
+      message: detail || 'Licenční klíč nebyl rozpoznán. Zkontrolujte prosím překlepy.',
+    };
+  } catch {
+    return {
+      valid: false,
+      message: 'Nelze se spojit s licenčním serverem Polar. Zkontrolujte připojení k internetu.',
+    };
+  }
+}
+
+/**
+ * Direct client-side Lemon Squeezy Public License API activation (legacy fallback).
  */
 async function verifyDirectlyWithLemonSqueezy(
   licenseKey: string,
@@ -279,15 +420,18 @@ export async function activateSevenDayTrial(current: LicenseState): Promise<Lice
 export async function activateLicenseKeyOnServer(
   licenseKey: string,
   email?: string,
-  current?: LicenseState
+  current?: LicenseState,
+  polarOrganizationId?: string
 ): Promise<{ state: LicenseState; message: string }> {
-  const normalizedKey = licenseKey.trim().toUpperCase();
-  if (normalizedKey.length < 4 || normalizedKey.length > 128) {
+  const trimmedKey = licenseKey.trim();
+  const normalizedKey = trimmedKey.toUpperCase();
+  if (trimmedKey.length < 4 || trimmedKey.length > 128) {
     throw new Error('Neplatný formát licenčního klíče.');
   }
 
   const finalizeActivation = async (opts: {
     customerEmail?: string;
+    activationId?: string;
     isDemo?: boolean;
     activatedAt?: string;
     message: string;
@@ -297,7 +441,8 @@ export async function activateLicenseKeyOnServer(
       trialUsed: current?.trialUsed ?? false,
       trialStartedAt: current?.trialStartedAt,
       trialEndsAt: current?.trialEndsAt,
-      licenseKey: normalizedKey,
+      licenseKey: trimmedKey,
+      activationId: opts.activationId,
       customerEmail: opts.customerEmail || email?.trim() || undefined,
       activatedAt: opts.activatedAt || new Date().toISOString(),
       isDemo: Boolean(opts.isDemo),
@@ -321,7 +466,7 @@ export async function activateLicenseKeyOnServer(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        licenseKey: normalizedKey,
+        licenseKey: trimmedKey,
         email: email?.trim() || '',
         instanceName: 'HorskyZapisnikWeb',
       }),
@@ -332,6 +477,7 @@ export async function activateLicenseKeyOnServer(
       backendReachable = true;
       const data = (await res.json()) as {
         valid?: boolean;
+        activationId?: string;
         customerEmail?: string;
         activatedAt?: string;
         isDemo?: boolean;
@@ -340,6 +486,7 @@ export async function activateLicenseKeyOnServer(
 
       if (res.ok && data.valid) {
         return finalizeActivation({
+          activationId: data.activationId,
           customerEmail: data.customerEmail,
           activatedAt: data.activatedAt,
           isDemo: data.isDemo,
@@ -355,11 +502,33 @@ export async function activateLicenseKeyOnServer(
     if (backendReachable && err instanceof Error) {
       throw err;
     }
-    // If /api/license/verify is not present (e.g. static GitHub Pages hosting), fall through to direct Lemon Squeezy verification
+    // If /api/license/verify is not present (e.g. static GitHub Pages hosting), fall through to direct provider verification
   }
 
-  // 3. Serverless / Static Hosting fallback: verify directly against Lemon Squeezy Public License API
-  const lsResult = await verifyDirectlyWithLemonSqueezy(normalizedKey);
+  // 3. Polar.sh Customer Portal public License Key API (primary for GitHub Pages static hosting)
+  const resolvedPolarOrgId = (
+    polarOrganizationId ||
+    getStaticFallbackConfig().polarOrganizationId ||
+    ''
+  ).trim();
+
+  if (resolvedPolarOrgId) {
+    const polarResult = await verifyDirectlyWithPolar(trimmedKey, resolvedPolarOrgId);
+    if (polarResult.valid) {
+      return finalizeActivation({
+        activationId: polarResult.activationId,
+        isDemo: false,
+        message: 'Doživotní licence Horský zápisník PRO byla ověřena přes Polar a aktivována.',
+      });
+    }
+    throw new Error(
+      polarResult.message ||
+        'Licenční klíč nebyl rozpoznán. Zkontrolujte prosím překlepy nebo kontaktujte podporu.'
+    );
+  }
+
+  // 4. Legacy Lemon Squeezy direct fallback (if Polar org ID is not configured)
+  const lsResult = await verifyDirectlyWithLemonSqueezy(trimmedKey);
   if (lsResult.valid) {
     return finalizeActivation({
       customerEmail: lsResult.customerEmail,
@@ -396,6 +565,10 @@ export async function fetchPublicBillingConfig(): Promise<PublicBillingConfig> {
     const data = (await res.json()) as Partial<PublicBillingConfig>;
     return {
       checkoutUrl: sanitizeHttpsUrl(data.checkoutUrl) || fallback.checkoutUrl,
+      polarOrganizationId:
+        typeof data.polarOrganizationId === 'string' && data.polarOrganizationId.trim()
+          ? data.polarOrganizationId.trim()
+          : fallback.polarOrganizationId,
       priceLifetimeCzk:
         typeof data.priceLifetimeCzk === 'number' ? data.priceLifetimeCzk : LIFETIME_PRICE_CZK,
       priceLifetimeEur:
