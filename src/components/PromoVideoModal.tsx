@@ -17,7 +17,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
 
   const base = import.meta.env.BASE_URL || './';
   const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-  const videoUrl = `${normalizedBase}promo-horsky-zapisnik.mp4`;
+  const videoUrl = `${normalizedBase}promo-horsky-zapisnik.mp4?v=4.2`;
 
   const handleCopyShareText = async () => {
     const shareText =
@@ -50,7 +50,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
               <h2 className="text-sm sm:text-base font-extrabold text-white leading-tight flex items-center gap-2">
                 <span>Propagační video — Horský zápisník a Archív tras</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  35 s · HD MP4 · Hudba (YouTube OK)
+                  42 s · HD MP4 · Hudba (YouTube OK)
                 </span>
               </h2>
               <p className="text-xs text-stone-400">
@@ -88,7 +88,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
             <div className="p-3 rounded-xl bg-stone-800/70 border border-stone-700/70">
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                <span>1 / 6 · 0:03 – 0:08</span>
+                <span>1 / 6 · 0:04 – 0:09</span>
               </div>
               <div className="font-bold text-stone-100 mt-1">Grafické zobrazení na mapě</div>
               <p className="text-[11px] text-stone-400 mt-0.5">
@@ -99,7 +99,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
             <div className="p-3 rounded-xl bg-stone-800/70 border border-stone-700/70">
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                 <Compass className="w-3 h-3" />
-                <span>2 / 6 · 0:08 – 0:12</span>
+                <span>2 / 6 · 0:10 – 0:15</span>
               </div>
               <div className="font-bold text-stone-100 mt-1">Ubytování, občerstvení a parkoviště</div>
               <p className="text-[11px] text-stone-400 mt-0.5">
@@ -110,7 +110,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
             <div className="p-3 rounded-xl bg-stone-800/70 border border-stone-700/70">
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                 <BarChart3 className="w-3 h-3" />
-                <span>3 / 6 · 0:12 – 0:17</span>
+                <span>3 / 6 · 0:15 – 0:20</span>
               </div>
               <div className="font-bold text-stone-100 mt-1">Různé statistiky a grafy</div>
               <p className="text-[11px] text-stone-400 mt-0.5">
@@ -121,7 +121,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
             <div className="p-3 rounded-xl bg-stone-800/70 border border-stone-700/70">
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                <span>4 / 6 · 0:17 – 0:22</span>
+                <span>4 / 6 · 0:21 – 0:26</span>
               </div>
               <div className="font-bold text-stone-100 mt-1">Systém milníků a výzev</div>
               <p className="text-[11px] text-stone-400 mt-0.5">
@@ -132,7 +132,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
             <div className="p-3 rounded-xl bg-stone-800/70 border border-stone-700/70">
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                 <Mountain className="w-3 h-3" />
-                <span>5 / 6 · 0:22 – 0:26</span>
+                <span>5 / 6 · 0:26 – 0:31</span>
               </div>
               <div className="font-bold text-stone-100 mt-1">3D dioráma trasy s přeletem</div>
               <p className="text-[11px] text-stone-400 mt-0.5">
@@ -143,7 +143,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
             <div className="p-3 rounded-xl bg-stone-800/70 border border-stone-700/70">
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                 <Play className="w-3 h-3" />
-                <span>6 / 6 · 0:26 – 0:31</span>
+                <span>6 / 6 · 0:32 – 0:37</span>
               </div>
               <div className="font-bold text-stone-100 mt-1">Výškový profil se sklonem</div>
               <p className="text-[11px] text-stone-400 mt-0.5">
