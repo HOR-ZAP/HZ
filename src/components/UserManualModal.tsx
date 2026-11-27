@@ -883,7 +883,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Film className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Přehrát promo video (42 s)</span>
+                <span>Promo video (16:9 &amp; 9:16)</span>
               </button>
             </div>
           </aside>

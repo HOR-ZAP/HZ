@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { X, Download, Play, Film, Sparkles, CheckCircle2, MapPin, Mountain, Compass, BarChart3 } from 'lucide-react';
+import {
+  X,
+  Download,
+  Play,
+  Film,
+  Sparkles,
+  CheckCircle2,
+  MapPin,
+  Mountain,
+  Compass,
+  BarChart3,
+  Monitor,
+  Smartphone,
+} from 'lucide-react';
 
 interface PromoVideoModalProps {
   isOpen: boolean;
@@ -12,12 +25,15 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
   onClose,
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
+  const [aspectFormat, setAspectFormat] = useState<'16:9' | '9:16'>('16:9');
 
   if (!isOpen) return null;
 
   const base = import.meta.env.BASE_URL || './';
   const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-  const videoUrl = `${normalizedBase}promo-horsky-zapisnik.mp4?v=4.2`;
+  const video16x9Url = `${normalizedBase}promo-horsky-zapisnik.mp4?v=4.2.1`;
+  const video9x16Url = `${normalizedBase}promo-horsky-zapisnik-9x16.mp4?v=4.2.1`;
+  const activeVideoUrl = aspectFormat === '16:9' ? video16x9Url : video9x16Url;
 
   const handleCopyShareText = async () => {
     const shareText =
@@ -43,14 +59,14 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-800 bg-stone-950/60 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0">
               <Film className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-extrabold text-white leading-tight flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-extrabold text-white leading-tight flex flex-wrap items-center gap-2">
                 <span>Propagační video — Horský zápisník a Archív tras</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  42 s · HD MP4 · Hudba (YouTube OK)
+                  42 s · 16:9 &amp; 9:16 HD · Hudba (YouTube OK)
                 </span>
               </h2>
               <p className="text-xs text-stone-400">
@@ -62,7 +78,7 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors cursor-pointer shrink-0"
             aria-label="Zavřít video"
           >
             <X className="w-5 h-5" />
@@ -71,9 +87,58 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
 
         {/* Video Player Body */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
-          <div className="relative rounded-xl overflow-hidden bg-black border border-stone-800 shadow-xl aspect-video">
+          {/* Format Switcher */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex p-1 rounded-xl bg-stone-950/90 border border-stone-800">
+              <button
+                type="button"
+                onClick={() => setAspectFormat('16:9')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  aspectFormat === '16:9'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-stone-400 hover:text-stone-100'
+                }`}
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>16:9 Na šířku</span>
+                <span className="hidden sm:inline text-[10px] font-semibold opacity-80">
+                  (YouTube / Web)
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAspectFormat('9:16')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  aspectFormat === '9:16'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-stone-400 hover:text-stone-100'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>9:16 Na výšku</span>
+                <span className="hidden sm:inline text-[10px] font-semibold opacity-80">
+                  (Shorts / Reels / TikTok)
+                </span>
+              </button>
+            </div>
+
+            <span className="text-[11px] font-medium text-stone-400">
+              {aspectFormat === '16:9'
+                ? 'Rozlišení 1280 × 720 px · YouTube, Facebook, Web'
+                : 'Rozlišení 720 × 1280 px · YouTube Shorts, Instagram Reels, TikTok'}
+            </span>
+          </div>
+
+          <div
+            className={`relative rounded-xl overflow-hidden bg-black border border-stone-800 shadow-xl ${
+              aspectFormat === '16:9'
+                ? 'w-full aspect-video'
+                : 'w-full max-w-[330px] aspect-[9/16] mx-auto'
+            }`}
+          >
             <video
-              src={videoUrl}
+              key={activeVideoUrl}
+              src={activeVideoUrl}
               controls
               autoPlay
               playsInline
@@ -154,14 +219,31 @@ export const PromoVideoModal: React.FC<PromoVideoModalProps> = ({
 
           {/* Actions Footer */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-stone-800">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <a
-                href={videoUrl}
-                download="promo-horsky-zapisnik.mp4"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-sm transition-colors cursor-pointer"
+                href={video16x9Url}
+                download="promo-horsky-zapisnik-16x9.mp4"
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-colors cursor-pointer ${
+                  aspectFormat === '16:9'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    : 'bg-stone-800 hover:bg-stone-700 text-stone-100 border border-stone-700'
+                }`}
               >
                 <Download className="w-4 h-4" />
-                <span>Stáhnout MP4 video (pro YouTube / Facebook / Web)</span>
+                <span>Stáhnout 16:9 (YouTube)</span>
+              </a>
+
+              <a
+                href={video9x16Url}
+                download="promo-horsky-zapisnik-9x16.mp4"
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-colors cursor-pointer ${
+                  aspectFormat === '9:16'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    : 'bg-stone-800 hover:bg-stone-700 text-stone-100 border border-stone-700'
+                }`}
+              >
+                <Download className="w-4 h-4" />
+                <span>Stáhnout 9:16 (Shorts / Reels)</span>
               </a>
 
               <button

@@ -1,6 +1,10 @@
-# Horský zápisník a Archív tras (v4.1 PRO)
+# Horský zápisník a Archív tras (v4.2 PRO)
 
-Webová a PWA aplikace pro evidenci horských výšlapů, plánování tras, 2D/3D zobrazení terénu, výškové profily, analytiku, milníky a tiskové/Excel sestavy.
+Webová a PWA aplikace pro evidenci horských výšlapů, plánování tras, 2D/3D zobrazení terénu, výškové profily, analytiku, milníky, interaktivní uživatelský manuál a tiskové/Excel sestavy.
+
+## Novinky ve verzi 4.2
+- **Přehledný uživatelský manuál (8 kapitol):** Interaktivní průvodce funkcemi a ovládáním s vyhledáváním a možností stažení pro offline čtení / tisk do PDF.
+- **Propagační video v 16:9 i 9:16 (HD MP4):** Prezentace 6 hlavních funkcí z reálných náhledů aplikace s autorskou hudbou (YouTube OK) pro YouTube/Web (16:9) i Shorts/Reels/TikTok (9:16).
 
 ## Architektura ukládání dat (Local-first + Google Disk)
 - **Lokální úložiště (IndexedDB):** Všechny výšlapy, GPX trasy, plánované trasy a profily účastníků se ukládají soukromě přímo v zařízení uživatele a fungují 100 % offline.

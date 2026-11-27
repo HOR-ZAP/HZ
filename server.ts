@@ -172,7 +172,7 @@ async function startServer() {
   app.use(express.json({ limit: '128kb' }));
 
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', version: '4.1.0-pro' });
+    res.json({ status: 'ok', version: '4.2.0-pro' });
   });
 
 function sanitizeEmail(raw: string | undefined): string {
