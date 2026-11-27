@@ -19,6 +19,7 @@ import {
   Crown,
   Lock,
   HardDrive,
+  Film,
 } from 'lucide-react';
 import { HikerIcon } from './ParticipantsView';
 import { LOGO_DATA_URL } from '../assets/logoDataUrl';
@@ -55,6 +56,7 @@ interface NavbarProps {
   onExportExcel: () => void;
   onImportJson: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImportGpx: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenPromoVideo?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -72,6 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onExportExcel,
   onImportJson,
   onImportGpx,
+  onOpenPromoVideo,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
@@ -372,6 +375,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>Offline režim a mapy</span>
                     </button>
+                    {onOpenPromoVideo && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDataMenuOpen(false);
+                          onOpenPromoVideo();
+                        }}
+                        className="w-full text-left px-2.5 py-2 hover:bg-emerald-50 rounded-lg flex items-center gap-2.5 text-stone-700 hover:text-emerald-800 font-semibold transition-colors cursor-pointer"
+                      >
+                        <Film className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Propagační video (MP4)</span>
+                      </button>
+                    )}
                     {canInstall && !isInstalled && (
                       <button
                         type="button"
@@ -655,6 +671,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <Smartphone className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>Nainstalovat</span>
+                  </button>
+                )}
+                {onOpenPromoVideo && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenPromoVideo();
+                    }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-stone-900 hover:bg-stone-800 text-white text-left col-span-2"
+                  >
+                    <Film className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Propagační video (Přehrát / Stáhnout MP4)</span>
                   </button>
                 )}
               </div>

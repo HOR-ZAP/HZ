@@ -16,6 +16,7 @@ import { OfflineModal } from './components/OfflineModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { AccountLicenseModal, AccountModalTab } from './components/AccountLicenseModal';
 import { WelcomeOnboardingBanner } from './components/WelcomeOnboardingBanner';
+import { PromoVideoModal } from './components/PromoVideoModal';
 import { Hike, HikeActivity, FilterState, RoutePart, PlannedRoute, ParticipantProfile } from './types';
 import {
   initializeLocalStore,
@@ -109,9 +110,10 @@ export default function App() {
     operatorAddress: '',
   });
 
-  // New-user onboarding banner state
+  // New-user onboarding banner & promo video modal state
   const [welcomeDismissed, setWelcomeDismissed] = useState<boolean>(false);
   const [isLoadingSample, setIsLoadingSample] = useState<boolean>(false);
+  const [isPromoVideoOpen, setIsPromoVideoOpen] = useState<boolean>(false);
   const onboardingGpxInputRef = useRef<HTMLInputElement>(null);
 
   // Account & PRO Modal state
@@ -1060,6 +1062,14 @@ export default function App() {
           onStartTrial={handleStartTrial}
           onActivateLicenseKey={handleActivateLicenseKey}
           onRequestDeactivateLicense={handleRequestDeactivateLicense}
+          onOpenPromoVideo={() => setIsPromoVideoOpen(true)}
+        />
+
+        {/* Promotional Video Player & MP4 Download Modal */}
+        <PromoVideoModal
+          isOpen={isPromoVideoOpen}
+          onClose={() => setIsPromoVideoOpen(false)}
+          onOpenLicenseModal={() => openAccountModal('license')}
         />
 
         {/* Offline Mode & Map Download Modal */}
@@ -1127,6 +1137,7 @@ export default function App() {
               onExportExcel={handleExportExcel}
               onImportJson={handleImportJson}
               onImportGpx={handleImportGpx}
+              onOpenPromoVideo={() => setIsPromoVideoOpen(true)}
             />
 
             {/* Hidden GPX input for Welcome Onboarding banner */}
@@ -1150,6 +1161,7 @@ export default function App() {
                     setActiveTab('journal');
                   }}
                   onTriggerGpxUpload={() => onboardingGpxInputRef.current?.click()}
+                  onOpenPromoVideo={() => setIsPromoVideoOpen(true)}
                   onDismiss={handleDismissWelcome}
                   isLoadingSample={isLoadingSample}
                 />

@@ -17,6 +17,7 @@ import {
   Scale,
   Mail,
   FileText,
+  Film,
 } from 'lucide-react';
 import { GoogleUserInfo } from '../services/googleAuth';
 import { DriveBackupInfo } from '../services/driveSync';
@@ -55,6 +56,7 @@ interface AccountLicenseModalProps {
   onStartTrial: () => Promise<void>;
   onActivateLicenseKey: (key: string, email: string) => Promise<void>;
   onRequestDeactivateLicense: () => void;
+  onOpenPromoVideo?: () => void;
 }
 
 function formatCzechDateTime(iso?: string): string {
@@ -103,6 +105,7 @@ export const AccountLicenseModal: React.FC<AccountLicenseModalProps> = ({
   onStartTrial,
   onActivateLicenseKey,
   onRequestDeactivateLicense,
+  onOpenPromoVideo,
 }) => {
   const [activeTab, setActiveTab] = useState<AccountModalTab>(initialTab);
   const [licenseKeyInput, setLicenseKeyInput] = useState('');
@@ -489,11 +492,24 @@ export const AccountLicenseModal: React.FC<AccountLicenseModalProps> = ({
                 </div>
               )}
 
-              {/* Legal Quick Links Footer */}
+              {/* Legal & Promo Video Quick Links Footer */}
               <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-stone-500">
-                <span>
-                  Jednorázová platba · bez skrytého předplatného · data zůstávají u vás
-                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span>Jednorázová platba · bez předplatného</span>
+                  {onOpenPromoVideo && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenPromoVideo();
+                      }}
+                      className="inline-flex items-center gap-1 font-bold text-stone-800 hover:text-emerald-700 underline cursor-pointer"
+                    >
+                      <Film className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Přehrát / stáhnout promo video (MP4)</span>
+                    </button>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => setActiveTab('legal')}
