@@ -17,6 +17,7 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { AccountLicenseModal, AccountModalTab } from './components/AccountLicenseModal';
 import { WelcomeOnboardingBanner } from './components/WelcomeOnboardingBanner';
 import { PromoVideoModal } from './components/PromoVideoModal';
+import { UserManualModal } from './components/UserManualModal';
 import { Hike, HikeActivity, FilterState, RoutePart, PlannedRoute, ParticipantProfile } from './types';
 import {
   initializeLocalStore,
@@ -114,6 +115,7 @@ export default function App() {
   const [welcomeDismissed, setWelcomeDismissed] = useState<boolean>(false);
   const [isLoadingSample, setIsLoadingSample] = useState<boolean>(false);
   const [isPromoVideoOpen, setIsPromoVideoOpen] = useState<boolean>(false);
+  const [isManualOpen, setIsManualOpen] = useState<boolean>(false);
   const onboardingGpxInputRef = useRef<HTMLInputElement>(null);
 
   // Account & PRO Modal state
@@ -384,7 +386,7 @@ export default function App() {
           const updatedInfo = await uploadBackupToDrive(
             token,
             {
-              version: '4.1.0-pro',
+              version: '4.2.0-pro',
               app: 'Horský zápisník a Archív tras',
               exportedAt: new Date().toISOString(),
               hikes,
@@ -886,7 +888,7 @@ export default function App() {
     }));
 
     const backupBundle = {
-      version: '4.1.0-pro',
+      version: '4.2.0-pro',
       app: 'Horský zápisník a Archív tras',
       exportedAt: new Date().toISOString(),
       hikes: cleanHikes,
@@ -1072,6 +1074,16 @@ export default function App() {
           onOpenLicenseModal={() => openAccountModal('license')}
         />
 
+        {/* Interactive User Manual Modal */}
+        <UserManualModal
+          isOpen={isManualOpen}
+          onClose={() => setIsManualOpen(false)}
+          onNavigateTab={handleSelectTab}
+          onOpenOfflineModal={() => setIsOfflineModalOpen(true)}
+          onOpenAccountModal={(tab) => openAccountModal(tab)}
+          onOpenPromoVideo={() => setIsPromoVideoOpen(true)}
+        />
+
         {/* Offline Mode & Map Download Modal */}
         <OfflineModal
           isOpen={isOfflineModalOpen}
@@ -1138,6 +1150,7 @@ export default function App() {
               onImportJson={handleImportJson}
               onImportGpx={handleImportGpx}
               onOpenPromoVideo={() => setIsPromoVideoOpen(true)}
+              onOpenManual={() => setIsManualOpen(true)}
             />
 
             {/* Hidden GPX input for Welcome Onboarding banner */}
@@ -1162,6 +1175,7 @@ export default function App() {
                   }}
                   onTriggerGpxUpload={() => onboardingGpxInputRef.current?.click()}
                   onOpenPromoVideo={() => setIsPromoVideoOpen(true)}
+                  onOpenManual={() => setIsManualOpen(true)}
                   onDismiss={handleDismissWelcome}
                   isLoadingSample={isLoadingSample}
                 />

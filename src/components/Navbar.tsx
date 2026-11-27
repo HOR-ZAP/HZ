@@ -20,6 +20,7 @@ import {
   Lock,
   HardDrive,
   Film,
+  HelpCircle,
 } from 'lucide-react';
 import { HikerIcon } from './ParticipantsView';
 import { LOGO_DATA_URL } from '../assets/logoDataUrl';
@@ -57,6 +58,7 @@ interface NavbarProps {
   onImportJson: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImportGpx: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onOpenPromoVideo?: () => void;
+  onOpenManual?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -75,6 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onImportJson,
   onImportGpx,
   onOpenPromoVideo,
+  onOpenManual,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
@@ -375,6 +378,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>Offline režim a mapy</span>
                     </button>
+                    {onOpenManual && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDataMenuOpen(false);
+                          onOpenManual();
+                        }}
+                        className="w-full text-left px-2.5 py-2 hover:bg-emerald-50 rounded-lg flex items-center gap-2.5 text-stone-700 hover:text-emerald-800 font-semibold transition-colors cursor-pointer"
+                      >
+                        <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Uživatelský manuál</span>
+                      </button>
+                    )}
                     {onOpenPromoVideo && (
                       <button
                         type="button"
@@ -406,12 +422,25 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
+            {/* Desktop User Manual Button */}
+            {onOpenManual && (
+              <button
+                type="button"
+                onClick={onOpenManual}
+                className="hidden md:flex bg-white hover:bg-emerald-50 border border-stone-200 hover:border-emerald-300 text-stone-700 hover:text-emerald-800 p-2 rounded-xl text-xs transition-all items-center justify-center shadow-xs cursor-pointer"
+                title="Uživatelský manuál a nápověda"
+                aria-label="Uživatelský manuál a nápověda"
+              >
+                <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+              </button>
+            )}
+
             {/* Version Label next to Export */}
             <span
               className="hidden md:inline-block text-[10px] font-medium text-stone-400 select-none ml-0.5"
-              title="Verze aplikace 4.1"
+              title="Verze aplikace 4.2"
             >
-              v4.1
+              v4.2
             </span>
 
             {/* Hidden File Inputs (shared between desktop and mobile) */}
@@ -578,7 +607,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
                   GPX soubory, záloha a export dat
                 </div>
-                <span className="text-[10px] font-medium text-stone-400 select-none">v4.1</span>
+                <span className="text-[10px] font-medium text-stone-400 select-none">v4.2</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -671,6 +700,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <Smartphone className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>Nainstalovat</span>
+                  </button>
+                )}
+                {onOpenManual && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenManual();
+                    }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-left col-span-2"
+                  >
+                    <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Uživatelský manuál (Průvodce funkcemi)</span>
                   </button>
                 )}
                 {onOpenPromoVideo && (

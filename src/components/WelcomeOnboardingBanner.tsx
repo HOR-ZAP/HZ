@@ -1,11 +1,12 @@
 import React from 'react';
-import { Mountain, Sparkles, FileUp, BookOpen, X, ShieldCheck, Film } from 'lucide-react';
+import { Mountain, Sparkles, FileUp, BookOpen, X, ShieldCheck, Film, HelpCircle } from 'lucide-react';
 
 interface WelcomeOnboardingBannerProps {
   onLoadSampleTrip: () => Promise<void>;
   onOpenNewHike: () => void;
   onTriggerGpxUpload: () => void;
   onOpenPromoVideo: () => void;
+  onOpenManual?: () => void;
   onDismiss: () => void;
   isLoadingSample: boolean;
 }
@@ -15,6 +16,7 @@ export const WelcomeOnboardingBanner: React.FC<WelcomeOnboardingBannerProps> = (
   onOpenNewHike,
   onTriggerGpxUpload,
   onOpenPromoVideo,
+  onOpenManual,
   onDismiss,
   isLoadingSample,
 }) => {
@@ -61,6 +63,17 @@ export const WelcomeOnboardingBanner: React.FC<WelcomeOnboardingBannerProps> = (
             <Film className="w-3.5 h-3.5 text-emerald-400" />
             <span>Promo video</span>
           </button>
+
+          {onOpenManual && (
+            <button
+              type="button"
+              onClick={onOpenManual}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold transition-colors cursor-pointer"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Manuál</span>
+            </button>
+          )}
 
           <button
             type="button"
