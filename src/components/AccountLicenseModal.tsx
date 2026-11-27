@@ -819,6 +819,11 @@ export const AccountLicenseModal: React.FC<AccountLicenseModalProps> = ({
                     Tiles, EOX Sentinel-2).
                   </li>
                   <li>
+                    <strong>Anonymní statistika spuštění (GoatCounter):</strong> Pro zjištění
+                    celkového počtu návštěv aplikace využíváme bezcookies nástroj GoatCounter, který
+                    neukládá sledovací cookies ani osobní údaje a nesleduje uživatele napříč weby.
+                  </li>
+                  <li>
                     <strong>Vaše práva podle GDPR (EU 2016/679):</strong> Svá data máte plně pod
                     kontrolou — můžete je kdykoli exportovat (JSON/XLSX), upravit nebo trvale smazat
                     přímo v aplikaci, vymazáním dat prohlížeče či odstraněním záložního souboru ze
